@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>EfsunDev Web Inspector</title>
+
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <header class="header">
+        <div>
+            <h1>EfsunDev</h1>
+            <p>Web Inspector</p>
+        </div>
+
+        <span class="version">v0.1.0</span>
+    </header>
+
+
+    <main>
+
+        <section class="website-card">
+
+            <p class="label">
+                Current website
+            </p>
+
+            <h2 id="page-title">
+                Waiting for page...
+            </h2>
+
+            <p id="page-url" class="url">
+                -
+            </p>
+
+        </section>
+
+
+        <button id="analyze-btn">
+            Analyze Website
+        </button>
+
+
+        <section
+            id="results"
+            class="results hidden"
+        >
+
+            <h3>Quick Analysis</h3>
+
+            <div class="result-row">
+                <span>Title</span>
+                <strong id="result-title">
+                    -
+                </strong>
+            </div>
+
+            <div class="result-row">
+                <span>Headings</span>
+                <strong id="result-headings">
+                    0
+                </strong>
+            </div>
+
+            <div class="result-row">
+                <span>Images</span>
+                <strong id="result-images">
+                    0
+                </strong>
+            </div>
+
+            <div class="result-row">
+                <span>Links</span>
+                <strong id="result-links">
+                    0
+                </strong>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="popup.js"></script>
+
+</body>
+</html>
