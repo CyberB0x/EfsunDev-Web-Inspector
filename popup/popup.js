@@ -1,115 +1,137 @@
-const analyzeButton =
-    document.getElementById("analyze-btn");
+document.addEventListener("DOMContentLoaded", async () => {
 
-const results =
-    document.getElementById("results");
+    const scoreElement =
+        document.getElementById("seo-score");
 
-const pageTitle =
-    document.getElementById("page-title");
+    const checksElement =
+        document.getElementById("seo-checks");
 
-const pageUrl =
-    document.getElementById("page-url");
+    const pageTitleElement =
+        document.getElementById("page-title");
 
-
-async function getCurrentTab() {
-
-    const tabs = await chrome.tabs.query({
-        active: true,
-        currentWindow: true
-    });
-
-    return tabs[0];
-}
+    const pageUrlElement =
+        document.getElementById("page-url");
 
 
-async function loadCurrentPage() {
+    try {
 
-    const tab = await getCurrentTab();
+        // Get current active browser tab
+        const [tab] = await chrome.tabs.query({
+            active: true,
+            currentWindow: true,
+        });
 
-    if (!tab) {
-        return;
+
+        // Send command to Content Script
+        chrome.tabs.sendMessage(
+            tab.id,
+            {
+                type: "ANALYZE_PAGE",
+            },
+            (response) => {
+
+                if (chrome.runtime.lastError) {
+
+                    console.error(
+                        chrome.runtime.lastError.message
+                    );
+
+                    checksElement.textContent =
+                        "Unable to analyze this page.";
+
+                    return;
+                }
+
+
+                if (!response || !response.success) {
+
+                    checksElement.textContent =
+                        "Analysis failed.";
+
+                    return;
+                }
+
+
+                renderPageInfo(response.pageData);
+
+                renderSEO(response.seo);
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        checksElement.textContent =
+            "Unexpected error occurred.";
     }
 
-    pageTitle.textContent =
-        tab.title || "Unknown page";
 
-    pageUrl.textContent =
-        tab.url || "-";
-}
+    function renderPageInfo(pageData) {
 
+        pageTitleElement.textContent =
+            pageData.title || "No title";
 
-analyzeButton.addEventListener(
-    "click",
-    async () => {
-
-        const tab = await getCurrentTab();
-
-        if (!tab?.id) {
-            return;
-        }
-
-        analyzeButton.textContent =
-            "Analyzing...";
-
-        analyzeButton.disabled = true;
-
-
-        try {
-
-            const response =
-                await chrome.tabs.sendMessage(
-                    tab.id,
-                    {
-                        action: "ANALYZE_PAGE"
-                    }
-                );
-
-
-            document.getElementById(
-                "result-title"
-            ).textContent =
-                response.title;
-
-
-            document.getElementById(
-                "result-headings"
-            ).textContent =
-                response.headings;
-
-
-            document.getElementById(
-                "result-images"
-            ).textContent =
-                response.images;
-
-
-            document.getElementById(
-                "result-links"
-            ).textContent =
-                response.links;
-
-
-            results.classList.remove(
-                "hidden"
-            );
-
-        } catch (error) {
-
-            console.error(
-                "EfsunDev analysis error:",
-                error
-            );
-
-        } finally {
-
-            analyzeButton.textContent =
-                "Analyze Website";
-
-            analyzeButton.disabled = false;
-        }
-
+        pageUrlElement.textContent =
+            pageData.url;
     }
-);
 
 
-loadCurrentPage();
+    function renderSEO(seo) {
+
+        scoreElement.textContent =
+            seo.score;
+
+        checksElement.innerHTML = "";
+
+
+        seo.checks.forEach((check) => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                `seo-check ${check.status}`;
+
+
+            const icon =
+                getStatusIcon(check.status);
+
+
+            item.innerHTML = `
+                <div class="check-header">
+
+                    <strong>
+                        ${icon} ${check.name}
+                    </strong>
+
+                    <span>
+                        ${check.points}/${check.maxPoints}
+                    </span>
+
+                </div>
+
+                <p>${check.message}</p>
+            `;
+
+
+            checksElement.appendChild(item);
+        });
+    }
+
+
+    function getStatusIcon(status) {
+
+        if (status === "pass") {
+            return "✓";
+        }
+
+        if (status === "warning") {
+            return "⚠";
+        }
+
+        return "✕";
+    }
+
+});

@@ -10,89 +10,62 @@
 
     <title>EfsunDev Web Inspector</title>
 
-    <link rel="stylesheet" href="popup.css">
+    <link
+        rel="stylesheet"
+        href="popup.css"
+    >
 </head>
 
 <body>
 
-<div class="app">
+    <main class="app">
 
-    <header class="header">
-        <div>
-            <h1>EfsunDev</h1>
-            <p>Web Inspector</p>
-        </div>
-
-        <span class="version">v0.1.0</span>
-    </header>
+        <header class="header">
+            <h1>EfsunDev Web Inspector</h1>
+            <p>Website Analysis</p>
+        </header>
 
 
-    <main>
+        <section class="page-info">
 
-        <section class="website-card">
+            <span>Current page</span>
 
-            <p class="label">
-                Current website
-            </p>
+            <strong id="page-title">
+                Loading...
+            </strong>
 
-            <h2 id="page-title">
-                Waiting for page...
-            </h2>
-
-            <p id="page-url" class="url">
-                -
-            </p>
+            <small id="page-url"></small>
 
         </section>
 
 
-        <button id="analyze-btn">
-            Analyze Website
-        </button>
+        <section class="score-section">
 
+            <p>SEO SCORE</p>
 
-        <section
-            id="results"
-            class="results hidden"
-        >
-
-            <h3>Quick Analysis</h3>
-
-            <div class="result-row">
-                <span>Title</span>
-                <strong id="result-title">
-                    -
-                </strong>
+            <div id="seo-score">
+                --
             </div>
 
-            <div class="result-row">
-                <span>Headings</span>
-                <strong id="result-headings">
-                    0
-                </strong>
-            </div>
+            <span>/ 100</span>
 
-            <div class="result-row">
-                <span>Images</span>
-                <strong id="result-images">
-                    0
-                </strong>
-            </div>
+        </section>
 
-            <div class="result-row">
-                <span>Links</span>
-                <strong id="result-links">
-                    0
-                </strong>
+
+        <section>
+
+            <h2>SEO Analysis</h2>
+
+            <div id="seo-checks">
+                Analyzing page...
             </div>
 
         </section>
 
     </main>
 
-</div>
 
-<script src="popup.js"></script>
+    <script src="popup.js"></script>
 
 </body>
 </html>

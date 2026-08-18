@@ -5,142 +5,154 @@
 body {
     margin: 0;
     width: 380px;
-    min-height: 420px;
 
     font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
+        Arial,
         sans-serif;
 
-    background: #0f1115;
-    color: #ffffff;
+    background: #0f172a;
+    color: #f8fafc;
 }
+
 
 .app {
     padding: 20px;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 
-    margin-bottom: 24px;
+.header {
+    margin-bottom: 20px;
 }
+
 
 .header h1 {
     margin: 0;
 
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 20px;
 }
+
 
 .header p {
-    margin: 3px 0 0;
+    margin: 5px 0 0;
 
-    color: #8b949e;
+    color: #94a3b8;
+
     font-size: 13px;
 }
 
-.version {
-    padding: 5px 8px;
 
-    border: 1px solid #30363d;
-    border-radius: 6px;
+.page-info {
+    display: flex;
+    flex-direction: column;
 
-    color: #8b949e;
-    font-size: 11px;
-}
+    gap: 5px;
 
-.website-card {
-    padding: 15px;
+    margin-bottom: 20px;
 
-    background: #161b22;
+    padding: 14px;
 
-    border: 1px solid #30363d;
+    background: #1e293b;
+
     border-radius: 10px;
-
-    margin-bottom: 15px;
 }
 
-.label {
-    margin: 0 0 8px;
 
-    color: #8b949e;
-
-    font-size: 11px;
-    text-transform: uppercase;
+.page-info span,
+.page-info small {
+    color: #94a3b8;
 }
 
-.website-card h2 {
-    margin: 0 0 5px;
 
-    font-size: 15px;
+.page-info small {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
 
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-.url {
-    margin: 0;
 
-    color: #8b949e;
-    font-size: 12px;
+.score-section {
+    display: flex;
 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    align-items: baseline;
+    justify-content: center;
+
+    gap: 5px;
+
+    margin-bottom: 25px;
 }
 
-button {
-    width: 100%;
 
+.score-section p {
+    margin-right: 15px;
+
+    color: #94a3b8;
+}
+
+
+#seo-score {
+    font-size: 42px;
+
+    font-weight: bold;
+}
+
+
+h2 {
+    font-size: 16px;
+}
+
+
+#seo-checks {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+.seo-check {
     padding: 12px;
 
-    border: none;
+    background: #1e293b;
+
     border-radius: 8px;
 
-    background: #238636;
-    color: white;
-
-    font-size: 14px;
-    font-weight: 600;
-
-    cursor: pointer;
+    border-left: 4px solid #64748b;
 }
 
-button:hover {
-    background: #2ea043;
+
+.seo-check.pass {
+    border-left-color: #22c55e;
 }
 
-.results {
-    margin-top: 20px;
+
+.seo-check.warning {
+    border-left-color: #f59e0b;
 }
 
-.results h3 {
-    font-size: 14px;
 
-    margin-bottom: 10px;
+.seo-check.fail {
+    border-left-color: #ef4444;
 }
 
-.result-row {
+
+.check-header {
     display: flex;
+
     justify-content: space-between;
 
-    padding: 11px 0;
-
-    border-bottom: 1px solid #21262d;
-
-    font-size: 13px;
+    align-items: center;
 }
 
-.result-row span {
-    color: #8b949e;
-}
 
-.hidden {
-    display: none;
+.seo-check p {
+    margin: 6px 0 0;
+
+    color: #cbd5e1;
+
+    font-size: 12px;
+
+    line-height: 1.4;
 }
