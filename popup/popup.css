@@ -91,9 +91,9 @@ body {
 }
 
 
-#seo-score {
+#seo-score
+#security-score {
     font-size: 42px;
-
     font-weight: bold;
 }
 
@@ -103,7 +103,8 @@ h2 {
 }
 
 
-#seo-checks {
+#seo-checks
+#security-checks {
     display: flex;
 
     flex-direction: column;
@@ -112,7 +113,7 @@ h2 {
 }
 
 
-.seo-check {
+.analysis-check {
     padding: 12px;
 
     background: #1e293b;
@@ -123,31 +124,22 @@ h2 {
 }
 
 
-.seo-check.pass {
+.analysis-check.pass {
     border-left-color: #22c55e;
 }
 
 
-.seo-check.warning {
+.analysis-check.warning {
     border-left-color: #f59e0b;
 }
 
 
-.seo-check.fail {
+.analysis-check.fail {
     border-left-color: #ef4444;
 }
 
 
-.check-header {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-}
-
-
-.seo-check p {
+.analysis-check p {
     margin: 6px 0 0;
 
     color: #cbd5e1;
@@ -155,4 +147,12 @@ h2 {
     font-size: 12px;
 
     line-height: 1.4;
+}
+
+.analyzer-section {
+    margin-top: 30px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #334155;
 }

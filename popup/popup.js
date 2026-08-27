@@ -1,10 +1,20 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
-    const scoreElement =
+    // =========================
+    // DOM Elements
+    // =========================
+
+    const seoScoreElement =
         document.getElementById("seo-score");
 
-    const checksElement =
+    const seoChecksElement =
         document.getElementById("seo-checks");
+
+    const securityScoreElement =
+        document.getElementById("security-score");
+
+    const securityChecksElement =
+        document.getElementById("security-checks");
 
     const pageTitleElement =
         document.getElementById("page-title");
@@ -22,7 +32,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
 
-        // Send command to Content Script
+        if (!tab || !tab.id) {
+            throw new Error("Active tab not found.");
+        }
+
+
+        // =========================
+        // SEO Analyzer
+        // =========================
+
         chrome.tabs.sendMessage(
             tab.id,
             {
@@ -36,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         chrome.runtime.lastError.message
                     );
 
-                    checksElement.textContent =
+                    seoChecksElement.textContent =
                         "Unable to analyze this page.";
 
                     return;
@@ -45,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 if (!response || !response.success) {
 
-                    checksElement.textContent =
+                    seoChecksElement.textContent =
                         "Analysis failed.";
 
                     return;
@@ -59,14 +77,59 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
 
+        // =========================
+        // Security Analyzer
+        // =========================
+
+        chrome.runtime.sendMessage(
+            {
+                type: "GET_SECURITY_ANALYSIS",
+                tabId: tab.id
+            },
+            (response) => {
+
+                if (chrome.runtime.lastError) {
+
+                    console.error(
+                        chrome.runtime.lastError.message
+                    );
+
+                    securityChecksElement.textContent =
+                        "Unable to analyze security.";
+
+                    return;
+                }
+
+
+                if (!response || !response.success) {
+
+                    securityChecksElement.textContent =
+                        "Security data unavailable. Reload the page.";
+
+                    return;
+                }
+
+
+                renderSecurity(response.security);
+            }
+        );
+
+
     } catch (error) {
 
         console.error(error);
 
-        checksElement.textContent =
+        seoChecksElement.textContent =
+            "Unexpected error occurred.";
+
+        securityChecksElement.textContent =
             "Unexpected error occurred.";
     }
 
+
+    // =========================
+    // Page Info
+    // =========================
 
     function renderPageInfo(pageData) {
 
@@ -78,12 +141,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
+    // =========================
+    // SEO Renderer
+    // =========================
+
     function renderSEO(seo) {
 
-        scoreElement.textContent =
+        seoScoreElement.textContent =
             seo.score;
 
-        checksElement.innerHTML = "";
+        seoChecksElement.innerHTML = "";
 
 
         seo.checks.forEach((check) => {
@@ -92,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 document.createElement("div");
 
             item.className =
-                `seo-check ${check.status}`;
+                `analysis-check ${check.status}`;
 
 
             const icon =
@@ -116,10 +183,57 @@ document.addEventListener("DOMContentLoaded", async () => {
             `;
 
 
-            checksElement.appendChild(item);
+            seoChecksElement.appendChild(item);
         });
     }
 
+
+    // =========================
+    // Security Renderer
+    // =========================
+
+    function renderSecurity(security) {
+
+        securityScoreElement.textContent =
+            security.score;
+
+        securityChecksElement.innerHTML = "";
+
+
+        security.checks.forEach((check) => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                `analysis-check ${check.status}`;
+
+
+            const icon =
+                getStatusIcon(check.status);
+
+
+            item.innerHTML = `
+                <div class="check-header">
+
+                    <strong>
+                        ${icon} ${check.name}
+                    </strong>
+
+                </div>
+
+                <p>${check.message}</p>
+            `;
+
+
+            securityChecksElement.appendChild(item);
+        });
+    }
+
+
+    // =========================
+    // Status Icon
+    // =========================
 
     function getStatusIcon(status) {
 
