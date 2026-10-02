@@ -234,35 +234,24 @@ function analyzeSEO(pageData) {
 }
 
 chrome.runtime.onMessage.addListener(
-   (message, sender, sendResponse) => {
-      if (message.type === "ANALYZE_PAGE"){
-         const pageData = getPageData();
-         const seoResult = analyzeSEO(pageData);
+    (message, sender, sendResponse) => {
 
-         console.log("=== EfsunDev Page Data ===");
-         console.log(pageData);
+        if (message.type === "ANALYZE_PAGE") {
 
-         console.log("=== EfsunDev SEO Analysis ===");
-         console.log(seoResult);
+            const pageData = getPageData();
+            const seoResult = analyzeSEO(pageData);
 
-         sendResponse({
-            success: true,
-            pageData: pageData,
-            seo: seoResult,
-         });
-      }
-   }
-);
+            console.log("=== EfsunDev Page Data ===");
+            console.log(pageData);
 
+            console.log("=== EfsunDev SEO Analysis ===");
+            console.log(seoResult);
 
-// Send data to Service Worker
-chrome.runtime.sendMessage(
-    {
-        type: "PAGE_DATA",
-        payload: pageData,
-    },
-    (response) => {
-        console.log("Response from Service Worker:");
-        console.log(response);
+            sendResponse({
+                success: true,
+                pageData: pageData,
+                seo: seoResult,
+            });
+        }
     }
 );

@@ -337,3 +337,329 @@ chrome.runtime.onMessage.addListener(
         }
     }
 );
+
+/**
+* Get cookies related to the current page
+*/
+async function collectCookies(tabUrl) {
+  try{
+    const url = new URL(tabUrl);
+
+    const cookies = await chrome.cookies.getAll({
+     url: tabUrl
+    });
+
+    return cookies.map(cookie => ({
+      name: cookie.name,
+      domain: cookie.domain,
+      path: cookie.path,
+
+      secure: cookie.secure,
+      httpOnly: cookie.httpOnly,
+      sameSite: cookie.sameSite,
+
+      session: cookie.session,
+      expirationDate: cookie.expirationDate ?? null,
+
+      hostOnly: cookie.hostOnly,
+
+      partitionKey: cookie.partitionKey ?? null
+    }));
+  }catch(error){
+    console.error("Cookie collection error:", error);
+
+    return [];
+  }
+}
+
+/**
+ * Get cookies related to the current page
+ */
+async function collectCookies(tabUrl) {
+  try {
+    const url = new URL(tabUrl);
+
+    const cookies = await chrome.cookies.getAll({
+      url: tabUrl
+    });
+
+    return cookies.map(cookie => ({
+      name: cookie.name,
+      domain: cookie.domain,
+      path: cookie.path,
+
+      secure: cookie.secure,
+      httpOnly: cookie.httpOnly,
+      sameSite: cookie.sameSite,
+
+      session: cookie.session,
+      expirationDate: cookie.expirationDate ?? null,
+
+      hostOnly: cookie.hostOnly,
+
+      partitionKey: cookie.partitionKey ?? null
+    }));
+  } catch (error) {
+    console.error("Cookie collection error:", error);
+
+    return [];
+  }
+}
+
+
+/**
+ * Analyze cookie security and privacy attributes
+ */
+function analyzeCookie(cookie) {
+  const checks = [];
+
+  // Secure
+  if (cookie.secure) {
+    checks.push({
+      name: "Secure",
+      status: "pass",
+      message: "Cookie is protected with the Secure flag."
+    });
+  } else {
+    checks.push({
+      name: "Secure",
+      status: "warning",
+      message: "Cookie does not use the Secure flag."
+    });
+  }
+
+  // HttpOnly
+  if (cookie.httpOnly) {
+    checks.push({
+      name: "HttpOnly",
+      status: "pass",
+      message: "Cookie is protected from JavaScript access."
+    });
+  } else {
+    checks.push({
+      name: "HttpOnly",
+      status: "warning",
+      message: "Cookie is accessible to JavaScript."
+    });
+  }
+
+  // SameSite
+  if (cookie.sameSite === "strict") {
+    checks.push({
+      name: "SameSite",
+      status: "pass",
+      message: "Cookie uses SameSite=Strict."
+    });
+  } else if (cookie.sameSite === "lax") {
+    checks.push({
+      name: "SameSite",
+      status: "pass",
+      message: "Cookie uses SameSite=Lax."
+    });
+  } else if (cookie.sameSite === "no_restriction") {
+    checks.push({
+      name: "SameSite",
+      status: "warning",
+      message: "Cookie uses SameSite=None."
+    });
+  } else {
+    checks.push({
+      name: "SameSite",
+      status: "warning",
+      message: "SameSite policy is not explicitly defined."
+    });
+  }
+
+  return checks;
+}
+
+/**
+ * Detect potentially third-party cookies
+ */
+function isPotentiallyThirdParty(cookieDomain, pageHostname) {
+  const cookieHost = cookieDomain.replace(/^\./, "");
+
+  return !(
+    pageHostname === cookieHost ||
+    pageHostname.endsWith("." + cookieHost)
+  );
+}
+
+function analyzeCookies(cookies, pageUrl) {
+  const url = new URL(pageUrl);
+  const pageHostname = url.hostname;
+
+  const analyzedCookies = cookies.map(cookie => {
+    const thirdParty = isPotentiallyThirdParty(
+      cookie.domain,
+      pageHostname
+    );
+
+    const checks = analyzeCookie(cookie);
+
+    if (thirdParty) {
+      checks.push({
+        name: "Third-Party",
+        status: "warning",
+        message: "Cookie appears to belong to another domain."
+      });
+    } else {
+      checks.push({
+        name: "Third-Party",
+        status: "pass",
+        message: "Cookie appears to be first-party."
+      });
+    }
+
+    return {
+      ...cookie,
+      thirdParty,
+      checks
+    };
+  });
+
+  return analyzedCookies;
+}
+
+function calculatePrivacyScore(cookies) {
+  if (cookies.length === 0) {
+    return 100;
+  }
+
+  let totalPoints = 0;
+  let maxPoints = 0;
+
+  for (const cookie of cookies) {
+    // Secure
+    maxPoints += 1;
+
+    if (cookie.secure) {
+      totalPoints += 1;
+    }
+
+    // HttpOnly
+    maxPoints += 1;
+
+    if (cookie.httpOnly) {
+      totalPoints += 1;
+    }
+
+    // SameSite
+    maxPoints += 1;
+
+    if (
+      cookie.sameSite === "strict" ||
+      cookie.sameSite === "lax"
+    ) {
+      totalPoints += 1;
+    } else if (cookie.sameSite === "no_restriction") {
+      totalPoints += 0.5;
+    }
+
+    // Third-party
+    maxPoints += 1;
+
+    if (!cookie.thirdParty) {
+      totalPoints += 1;
+    } else {
+      totalPoints += 0.5;
+    }
+  }
+
+  return Math.round((totalPoints / maxPoints) * 100);
+}
+
+function getPrivacyScoreStatus(score) {
+  if (score >= 80) {
+    return "pass";
+  }
+
+  if (score >= 50) {
+    return "warning";
+  }
+
+  return "fail";
+}
+
+chrome.runtime.onMessage.addListener(
+  async (message, sender, sendResponse) => {
+
+    if (message.type === "GET_COOKIE_ANALYSIS") {
+      try {
+        const cookies = await collectCookies(message.url);
+
+        const analyzedCookies = analyzeCookies(
+          cookies,
+          message.url
+        );
+
+        const score = calculatePrivacyScore(
+          analyzedCookies
+        );
+
+        sendResponse({
+          success: true,
+          cookies: analyzedCookies,
+          score,
+          status: getPrivacyScoreStatus(score)
+        });
+
+      } catch (error) {
+        console.error(
+          "Cookie analysis error:",
+          error
+        );
+
+        sendResponse({
+          success: false,
+          error: error.message
+        });
+      }
+
+      return true;
+    }
+  }
+);
+
+/**
+ * Handle cookie analysis requests from popup
+ */
+chrome.runtime.onMessage.addListener(
+  async (message, sender, sendResponse) => {
+
+    if (message.type === "GET_COOKIE_ANALYSIS") {
+      try {
+        const cookies = await collectCookies(message.url);
+
+        const analyzedCookies = analyzeCookies(
+          cookies,
+          message.url
+        );
+
+        const score = calculatePrivacyScore(
+          analyzedCookies
+        );
+
+        sendResponse({
+          success: true,
+          cookies: analyzedCookies,
+          score,
+          status: getPrivacyScoreStatus(score)
+        });
+
+      } catch (error) {
+        console.error(
+          "Cookie analysis error:",
+          error
+        );
+
+        sendResponse({
+          success: false,
+          error: error.message
+        });
+      }
+
+      return true;
+    }
+  }
+);
